@@ -4,8 +4,8 @@
   "description": "My template for easy codding",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack serve --open"
+    "build": "yarn webpack",
+    "dev": "yarn webpack serve --open"
   },
   "author": "Valeriy Hnybidenko",
   "license": "ISC",
