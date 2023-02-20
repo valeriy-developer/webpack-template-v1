@@ -1,18 +1,28 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+const mode = process.env.NODE_ENV || 'development';
+
+const devMode = mode === 'development';
+
+const target = devMode ? 'web' : 'browserslist';
+
+const devtool = devMode ? undefined : 'source-map';
 
 module.exports = {
-  mode: 'development',
-  entry: {
-    main: path.resolve(__dirname, 'src/index.js'),
-  },
+  mode,
+  target,
+  devtool,
+  context: path.resolve(__dirname, 'src'),
+  entry: ['@babel/polyfill', path.resolve(__dirname, 'src', 'index.js')],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name][contenthash].js',
+    filename: 'assets/scripts/[name].[contenthash].js',
+    publicPath: '/',
     clean: true,
-    assetModuleFilename: '[name][ext]',
+    assetModuleFilename: 'assets/images/[hash][ext]',
   },
-  devtool: 'source-map',
   devServer: {
     static: {
       directory: path.resolve(__dirname, 'dist'),
@@ -26,8 +36,20 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.scss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        test: /\.(c|sa|sc)ss$/i,
+        use: [
+          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('postcss-preset-env')],
+              },
+            },
+          },
+          'sass-loader',
+        ],
       },
       {
         test: /\.js$/,
@@ -40,20 +62,56 @@ module.exports = {
         },
       },
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        use: [
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              mozjpeg: {
+                progressive: true,
+              },
+              // optipng.enabled: false will disable optipng
+              optipng: {
+                enabled: false,
+              },
+              pngquant: {
+                quality: [0.65, 0.9],
+                speed: 4,
+              },
+              gifsicle: {
+                interlaced: false,
+              },
+              // the webp option will enable WEBP
+              webp: {
+                quality: 75,
+              },
+            },
+          },
+        ],
         type: 'asset/resource',
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
+        generator: {
+          filename: 'assets/fonts/[name][ext]',
+        },
+      },
+      {
+        test: /\.html$/i,
+        loader: 'html-loader',
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'My template v1.0.0',
+      inject: true,
+      hash: true,
+      template: path.resolve(__dirname, 'src', 'template.html'),
       filename: 'index.html',
-      template: 'src/template.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'assets/styles/[name].[contenthash].css',
     }),
   ],
 };
