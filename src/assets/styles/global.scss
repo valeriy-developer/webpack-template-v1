@@ -72,3 +72,11 @@
     }
   }
 }
+
+.ratio-img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  // aspect-ratio: ratio(800, 800);
+}
