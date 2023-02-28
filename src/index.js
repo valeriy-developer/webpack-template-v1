@@ -1,2 +1,2 @@
-import './template.html';
-import './assets/styles/index.scss';
+import './template.html'
+import './assets/styles/index.scss'
